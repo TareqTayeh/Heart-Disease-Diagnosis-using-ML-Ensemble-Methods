@@ -68,7 +68,7 @@ X_val = X_val.fillna(X_val.mode().iloc[0])
 ### do not recomment ever uncommenting this, you do not want this to run, just here for evidence of tuning ##
 
 #def create_model(learn_rate=0.01, momentum=0, init_mode='uniform', activation='relu', 
-                    dropout_rate=0.0, weight_constraint=0, neurons1=1, neurons2=1):
+#                    dropout_rate=0.0, weight_constraint=0, neurons1=1, neurons2=1):
 ## create model
 #    model = Sequential()
 #    model.add(Dense(neurons1, input_dim=13, kernel_initializer=init_mode, activation=activation, kernel_constraint=max_norm(weight_constraint)))
@@ -96,8 +96,8 @@ X_val = X_val.fillna(X_val.mode().iloc[0])
 #neurons1 = [1, 4, 8, 12, 16, 20, 24, 28]
 #neurons2 = [1, 2, 4, 6, 8]
 #param_grid = dict(batch_size=batch_size, epochs=epochs, learn_rate=learn_rate, momentum=momentum, 
-                    init_mode=init_mode, activation=activation, dropout_rate=dropout_rate, weight_constraint=weight_constraint, 
-                    neurons1=neurons1, neurons2=neurons2)
+#                    init_mode=init_mode, activation=activation, dropout_rate=dropout_rate, weight_constraint=weight_constraint, 
+#                    neurons1=neurons1, neurons2=neurons2)
 #grid = GridSearchCV(estimator=model, param_grid=param_grid, n_jobs=-1, cv=3)
 #grid_result = grid.fit(X_train, Y_train)
 #
