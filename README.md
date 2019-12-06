@@ -1,4 +1,4 @@
-# Heart_Disease_Diagnosis
+# Heart Disease Diagnosis
 
 Heart disease affects many people in Canada and around the world. Currently, in Canada, more than 33,600 people die each year as a result of heart disease, making it one of the leading causes of death. If a patient could be identified as someone at risk for developing heart disease, then preventative measures could be taken to lower their risk, including quitting smoking, getting regular exercise, eating healthy and quitting/limiting alcohol consumption. Additionally, if the patient is identified to be at risk for developing heart disease, they can be monitored for high blood pressure and high cholesterol, and these factors can be controlled with proper health care to help prevent the development of heart disease.  
 
