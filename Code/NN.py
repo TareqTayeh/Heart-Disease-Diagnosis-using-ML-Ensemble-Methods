@@ -15,7 +15,7 @@ from tensorflow.keras.layers import Dropout
 from tensorflow.keras.optimizers import SGD
 from tensorflow.keras.constraints import max_norm
 
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, KFold
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import accuracy_score
