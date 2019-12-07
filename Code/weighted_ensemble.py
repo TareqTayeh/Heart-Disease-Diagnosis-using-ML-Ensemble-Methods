@@ -4,32 +4,30 @@ import pandas as pd
 import numpy
 import numpy as np
 
-from sklearn.svm import SVC #support vector classifier class
+from sklearn.svm import SVC
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
-from sklearn.model_selection import train_test_split, KFold
+from sklearn.model_selection import KFold
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.linear_model import LogisticRegression as logr
 from sklearn.ensemble import VotingClassifier as VotingClassification
 from sklearn.naive_bayes import GaussianNB
-from keras.models import Sequential
-from keras.layers import Dropout, Dense
-from keras.optimizers import adam
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.optimizers import Adam 
+
     
 #reading in data from excel
-data = pd.read_excel (r'C:\Users\lauren\Documents\1st year Grad\ECE 9603\project\heart_edited.xlsx')
-data = data.drop(['Age'], axis = 1)
-data = data.drop(['fbs'], axis = 1)
-data = data.drop(['restecg'], axis = 1)
-data = data.drop(['chol'], axis = 1)
-data = data.drop(['trestbps'], axis = 1)
+data = pd.read_excel(r'../Dataset/heart_edited.xlsx')
+#Drop specific columns
+data = data.drop(["age","fbs","trestbps","chol","restecg"],axis=1)
 
 
-#assign x and y
-y = data.target.values.ravel()
-x = data.drop(['target'], axis = 1)
-#make array from df
-x=np.array(x)
-y=np.array(y)
+# Split the target from the rest of the data set, assign x and y
+y_df = data.target.values.ravel()
+x_df = data.drop(['target'], axis = 1)
+# Make array from df
+x = np.array(x_df)
+y = np.array(y_df)
 
 cmResultsSVM = pd.DataFrame(columns = ['SVM1', 'SVM2', 'SVM3', 'SVM4', 'SVM5', 'AVG'])
 cmResultsLR = pd.DataFrame(columns  = ['LR1',  'LR2',  'LR3',  'LR4',  'LR5', 'AVG'])
@@ -97,8 +95,8 @@ for train_index, test_index in kf.split(x):
     model.add(Dense(1, activation='sigmoid'))
 
     # Compile model
-    Adam = adam(lr=0.001)
-    model.compile(loss='binary_crossentropy', optimizer=Adam, metrics=['accuracy'])
+    adam = Adam(lr=0.001)
+    model.compile(loss='binary_crossentropy', optimizer=adam, metrics=['accuracy'])
     model.fit(X_train, Y_train, validation_data=(X_test, Y_test), epochs=300, batch_size=10, verbose = 10)
     Y_pred_NN = np.round(model.predict(X_test)).astype(int)
        
@@ -157,6 +155,8 @@ for train_index, test_index in kf.split(x):
     clResultsGNB[g] =result_GNB
     clResultsNN[n] = result_NN
     clResultsENS[e] = result_en
+    
+    #Increment
     a=a+1
 
 

@@ -4,26 +4,25 @@ import numpy
 import numpy as np
 import seaborn as sn
 import matplotlib.pyplot as plt
+import eli5
 
-from sklearn.svm import SVC #support vector classifier class
+from sklearn.svm import SVC
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
-from sklearn.model_selection import train_test_split, KFold
+from sklearn.model_selection import KFold
 from sklearn.preprocessing import MinMaxScaler
+from eli5.sklearn import PermutationImportance
 
 
 #reading in data from excel
-data = pd.read_excel (r'C:\Users\lauren\Documents\1st year Grad\ECE 9603\project\heart_edited.xlsx')
-data = data.drop(['Age'], axis = 1)
-data = data.drop(['fbs'], axis = 1)
-data = data.drop(['restecg'], axis = 1)
-data = data.drop(['chol'], axis = 1)
-data = data.drop(['trestbps'], axis = 1)
-#assign x and y
-y = data.target.values.ravel()
-x = data.drop(['target'], axis = 1)
-#make array from df
-x=np.array(x)
-y=np.array(y)
+data = pd.read_excel(r'../Dataset/heart_edited.xlsx')
+#Drop specific columns
+data = data.drop(["age","fbs","trestbps","chol","restecg"],axis=1)
+# Split the target from the rest of the data set, assign x and y
+y_df = data.target.values.ravel()
+x_df = data.drop(['target'], axis = 1)
+# Make array from df
+x = np.array(x_df)
+y = np.array(y_df)
 
 SVM = ['SVM1',  'SVM2',  'SVM3',  'SVM4',  'SVM5']
 cmResults = pd.DataFrame(columns  = ['SVM1',  'SVM2',  'SVM3',  'SVM4',  'SVM5'])
@@ -34,6 +33,7 @@ kernels = ['linear', 'poly', 'rbf', 'sigmoid']
 #k folds split
 kf = KFold(5, True)
 kf.get_n_splits(x)
+a = 0 
 for a in range (0,4):
     ker = kernels[a]#set solver type
     print("kernel type is: ", ker)
@@ -64,6 +64,10 @@ for a in range (0,4):
         result_SVM = (accuracy_score(Y_test,Y_pred), precision_score(Y_test,Y_pred), recall_score(Y_test,Y_pred), f1_score(Y_test,Y_pred))
         clResults[s] = result_SVM
         b=b+1
+        
+        #Permutation Importance
+        perm = PermutationImportance(model, random_state = 1).fit(X_test, Y_test)
+        eli5.show_weights(perm, feature_names = x_df.columns.tolist())
 
     
     #calculate average over 5 trials
@@ -92,6 +96,7 @@ for a in range (0,4):
     t -= 0.5 # Subtract 0.5 from the top
     plt.ylim(b, t) # update the ylim(bottom, top) values
     plt.show() 
+    
 
 
 

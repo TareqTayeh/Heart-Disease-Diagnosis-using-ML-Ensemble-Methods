@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 import tensorflow as tf
+import eli5
 
 from tensorflow.keras.utils import to_categorical
 from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
@@ -14,21 +15,42 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.layers import Dropout
 from tensorflow.keras.optimizers import SGD
 from tensorflow.keras.constraints import max_norm
+from eli5.sklearn import PermutationImportance
 
-from sklearn.model_selection import train_test_split, KFold
+from sklearn.model_selection import KFold
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 
+
+# ########################################################################### #
+#######                        NN Model Creation                        #######
+# ########################################################################### #
+def create_model():
+    # create model
+    model = Sequential()
+    model.add(Dense(16, input_dim=8, kernel_initializer='normal', activation='relu'))
+    model.add(Dense(8, kernel_initializer='normal', activation='relu'))
+    model.add(Dropout(0.2))
+    model.add(Dense(1, activation='sigmoid'))
+    
+    # Compile model
+    adam = Adam(lr=0.001)
+    model.compile(loss='binary_crossentropy', optimizer=adam, metrics=['accuracy'])
+    return model
+
 # ########################################################################### #
 #######                        Data Exploration                         #######
 # ########################################################################### #
 
 # Load the data
-dataframe = pd.read_csv("heart_edited.csv")
-print (dataframe.head()) # Observe the first 5 entries to the data
+dataframe = pd.read_excel(r'../Dataset/heart_edited.xlsx')
+#Drop specific columns
+dataframe = dataframe.drop(["age","fbs","trestbps","chol","restecg"],axis=1)
+# Observe the first 5 entries to the data
+print (dataframe.head()) 
 
 # Look at distribution of values and general info of the data set
 countNoDisease = len(dataframe[dataframe.target == 0])
@@ -38,45 +60,33 @@ print("Percentage of Patients With Heart Disease: {:.2f}%".format((countHaveDise
 
 dataframe.info()
 
-# look for null values
-print (dataframe.isnull().any().describe())
-# fill in null values
-null_counts = dataframe.isnull().sum()
-null_counts[null_counts > 0].sort_values(ascending=False)
-
 #Look at correlation between the values of the data set
 plt.figure(figsize=(14,10))
 sns.heatmap(dataframe.corr(),annot=True,cmap='hsv',fmt='.3f',linewidths=2)
 plt.show()
 
-# Split the target from the rest of the data set
-predictors = dataframe.drop("target",axis=1)
-target = dataframe["target"]
-# Split into training and test set 70:30
-X_train, X_test, Y_train, Y_test = train_test_split(predictors, target, test_size=0.30, random_state=1)
-# Split into test and validation set 67:33 so total ratio is 70:20:10
-X_test, X_val, Y_test,Y_val = train_test_split(X_test, Y_test, test_size=0.33, random_state=1)
-    
-# replace nan values from the test and training sets
-X_train = X_train.fillna(X_train.mode().iloc[0])
-X_test = X_test.fillna(X_test.mode().iloc[0])
-X_val = X_val.fillna(X_val.mode().iloc[0])
+# Split the target from the rest of the data set, assign x and y
+y_df = dataframe.target.values.ravel()
+x_df = dataframe.drop(['target'], axis = 1)
+# Make array from df
+x = np.array(x_df)
+y = np.array(y_df)
 
-#normalize training data 
-norm = MinMaxScaler(feature_range=(0, 1))
-X_train = norm.fit_transform(X_train)
+#k folds split
+kf = KFold(5, True)
+kf.get_n_splits(x) 
+# Enumerate splits
+for train_index, test_index in kf.split(x):
+    X_train, X_test = x[train_index], x[test_index]
+    Y_train, Y_test = y[train_index], y[test_index]
 
-#normalize testing data 
-X_test = norm.fit_transform(X_test)
-
-#normalize validation data 
-X_val = norm.fit_transform(X_val)
-
-
-#Drop specific columns
-#X_train = dataframe.drop(["Age","fbs","trestbps","chol","restecg"],axis=1)
-#X_test = dataframe.drop(["Age","fbs","trestbps","chol","restecg"],axis=1)
-#X_val = dataframe.drop(["Age","fbs","trestbps","chol","restecg"],axis=1)
+    #normailize train data 
+    norm = MinMaxScaler(feature_range=(0, 1))
+    X_train = norm.fit_transform(X_train)
+    Y_train = norm.fit_transform(Y_train.reshape(-1, 1))
+   
+    X_test = norm.fit_transform(X_test)
+    Y_test = norm.fit_transform(Y_test.reshape(-1, 1))
 
 # #############################################################################
 #######                          Model Tuning                           #######
@@ -130,29 +140,14 @@ X_val = norm.fit_transform(X_val)
 #######                      Build Final Model                          #######
 # #############################################################################
 
-def create_model():
-    # create model
-    model = Sequential()
-    model.add(Dense(16, input_dim=13, kernel_initializer='normal', activation='relu'))
-    model.add(Dense(8, kernel_initializer='normal', activation='relu'))
-    model.add(Dropout(0.2))
-    model.add(Dense(1, activation='sigmoid'))
+    model = create_model()
     
-    # Compile model
-    adam = Adam(lr=0.001)
-    model.compile(loss='binary_crossentropy', optimizer=adam, metrics=['accuracy'])
-    return model
-
-model = create_model()
-
-print(model.summary())
-
-#Need these when the data is normalized
-Y_train= np.asarray(Y_train) 
-Y_val= np.asarray(Y_val)
-
-history=model.fit(X_train, Y_train, validation_data=(X_val, Y_val), epochs=300, batch_size=10, verbose = 10)
-
+    print(model.summary())
+    
+    #Need these when the data is normalized
+    Y_train= np.asarray(Y_train) 
+    
+    history=model.fit(X_train, Y_train, validation_data=(X_test, Y_test), epochs=300, batch_size=10, verbose = 10)
 
 # #############################################################################
 #######                   Evaluate Final Model                          #######
@@ -197,3 +192,7 @@ b += 0.5 # Add 0.5 to the bottom
 t -= 0.5 # Subtract 0.5 from the top
 plt.ylim(b, t) # update the ylim(bottom, top) values
 plt.show() # ta-da!
+
+#Permutation Importance
+perm = PermutationImportance(model, random_state = 1).fit(X_test, Y_test)
+eli5.show_weights(perm, feature_names = x_df.columns.tolist())

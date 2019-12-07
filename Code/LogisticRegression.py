@@ -4,27 +4,27 @@ import numpy
 import numpy as np
 import seaborn as sn
 import matplotlib.pyplot as plt
+import eli5
+
 from sklearn.linear_model import LogisticRegression as logr
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
-from sklearn.model_selection import train_test_split, KFold
+from sklearn.model_selection import KFold
 from sklearn.preprocessing import MinMaxScaler
+from eli5.sklearn import PermutationImportance
 
 #***** assign values after train test split from average of coresponding heart disease true or false ********8
 
 #reading in data from excel
-data = pd.read_excel (r'C:\Users\lauren\Documents\1st year Grad\ECE 9603\project\heart_edited.xlsx')
-data = data.drop(['Age'], axis = 1)
-data = data.drop(['fbs'], axis = 1)
-data = data.drop(['restecg'], axis = 1)
-data = data.drop(['chol'], axis = 1)
-data = data.drop(['trestbps'], axis = 1)
+data = pd.read_excel(r'../Dataset/heart_edited.xlsx')
+#Drop specific columns
+data = data.drop(["age","fbs","trestbps","chol","restecg"],axis=1)
 
-#assign x and y
-y = data.target.values
-x = data.drop(['target'], axis = 1)
-#make array from df
-x=np.array(x)
-y=np.array(y)
+# Split the target from the rest of the data set, assign x and y
+y_df = data.target.values.ravel()
+x_df = data.drop(['target'], axis = 1)
+# Make array from df
+x = np.array(x_df)
+y = np.array(y_df)
 
 ls = ['LR1',  'LR2',  'LR3',  'LR4',  'LR5']
 cmResults = pd.DataFrame(columns  = ['LR1',  'LR2',  'LR3',  'LR4',  'LR5'])
@@ -67,6 +67,10 @@ for a in range (0,5):
         result_LR = (accuracy_score(Y_test,Y_pred), precision_score(Y_test,Y_pred), recall_score(Y_test,Y_pred), f1_score(Y_test,Y_pred))
         clResults[l] = result_LR
         b=b+1
+        
+        #Permutation Importance
+        perm = PermutationImportance(model, random_state = 1).fit(X_test, Y_test)
+        eli5.show_weights(perm, feature_names = x_df.columns.tolist())
 
     #calculate average over 5 trials
     cmResults['AVG'] = cmResults.mean(axis=1)
