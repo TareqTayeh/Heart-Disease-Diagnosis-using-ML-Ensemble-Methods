@@ -46,7 +46,7 @@ def create_model():
 # ########################################################################### #
 
 # Load the data
-dataframe = pd.read_excel(r'../Dataset/heart_edited.xlsx')
+dataframe = pd.read_excel(r'../Dataset/heart_dataset_complete.xlsx')
 #Drop specific columns
 dataframe = dataframe.drop(["age","fbs","trestbps","chol","restecg"],axis=1)
 # Observe the first 5 entries to the data

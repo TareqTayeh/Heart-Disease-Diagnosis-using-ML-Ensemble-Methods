@@ -14,7 +14,7 @@ from eli5.sklearn import PermutationImportance
 
 
 #reading in data from excel
-data = pd.read_excel(r'../Dataset/heart_edited.xlsx')
+data = pd.read_excel(r'../Dataset/heart_dataset_complete.xlsx')
 #Drop specific columns
 data = data.drop(["age","fbs","trestbps","chol","restecg"],axis=1)
 # Split the target from the rest of the data set, assign x and y

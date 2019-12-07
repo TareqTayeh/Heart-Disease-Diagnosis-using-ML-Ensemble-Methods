@@ -20,7 +20,7 @@ from scipy import interp
 
 
 #Reading csv values
-df = pd.read_excel(r'../Dataset/heart_edited.xlsx')
+df = pd.read_excel(r'../Dataset/heart_dataset_complete.xlsx')
 df.head()
 
 

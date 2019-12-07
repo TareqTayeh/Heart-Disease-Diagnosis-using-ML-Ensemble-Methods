@@ -17,7 +17,7 @@ get_ipython().run_line_magic('matplotlib', 'inline')
 
 
 #Reading csv values
-df = pd.read_excel(r'../Dataset/heart_edited.xlsx')
+df = pd.read_excel(r'../Dataset/heart_dataset_complete.xlsx')
 
 
 # In[3]:
