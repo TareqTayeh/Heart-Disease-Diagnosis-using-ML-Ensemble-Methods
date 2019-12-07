@@ -62,15 +62,15 @@ X_train = X_train.fillna(X_train.mode().iloc[0])
 X_test = X_test.fillna(X_test.mode().iloc[0])
 X_val = X_val.fillna(X_val.mode().iloc[0])
 
-##normalize training data 
-#norm = MinMaxScaler(feature_range=(0, 1))
-#X_train = norm.fit_transform(X_train)
-#
-##normalize testing data 
-#X_test = norm.fit_transform(X_test)
-#
-##normalize validation data 
-#X_val = norm.fit_transform(X_val)
+#normalize training data 
+norm = MinMaxScaler(feature_range=(0, 1))
+X_train = norm.fit_transform(X_train)
+
+#normalize testing data 
+X_test = norm.fit_transform(X_test)
+
+#normalize validation data 
+X_val = norm.fit_transform(X_val)
 
 
 #Drop specific columns
