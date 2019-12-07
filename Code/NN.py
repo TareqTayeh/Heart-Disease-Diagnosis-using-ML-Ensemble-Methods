@@ -147,9 +147,9 @@ model = create_model()
 
 print(model.summary())
 
-##Need these when the data is normalized
-#Y_train= np.asarray(Y_train) 
-#Y_val= np.asarray(Y_val)
+#Need these when the data is normalized
+Y_train= np.asarray(Y_train) 
+Y_val= np.asarray(Y_val)
 
 history=model.fit(X_train, Y_train, validation_data=(X_val, Y_val), epochs=300, batch_size=10, verbose = 10)
 
