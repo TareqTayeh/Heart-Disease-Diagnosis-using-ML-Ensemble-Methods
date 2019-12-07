@@ -62,6 +62,22 @@ X_train = X_train.fillna(X_train.mode().iloc[0])
 X_test = X_test.fillna(X_test.mode().iloc[0])
 X_val = X_val.fillna(X_val.mode().iloc[0])
 
+##normalize training data 
+#norm = MinMaxScaler(feature_range=(0, 1))
+#X_train = norm.fit_transform(X_train)
+#
+##normalize testing data 
+#X_test = norm.fit_transform(X_test)
+#
+##normalize validation data 
+#X_val = norm.fit_transform(X_val)
+
+
+#Drop specific columns
+#X_train = dataframe.drop(["Age","fbs","trestbps","chol","restecg"],axis=1)
+#X_test = dataframe.drop(["Age","fbs","trestbps","chol","restecg"],axis=1)
+#X_val = dataframe.drop(["Age","fbs","trestbps","chol","restecg"],axis=1)
+
 # #############################################################################
 #######                          Model Tuning                           #######
 # #############################################################################
@@ -130,6 +146,10 @@ def create_model():
 model = create_model()
 
 print(model.summary())
+
+##Need these when the data is normalized
+#Y_train= np.asarray(Y_train) 
+#Y_val= np.asarray(Y_val)
 
 history=model.fit(X_train, Y_train, validation_data=(X_val, Y_val), epochs=300, batch_size=10, verbose = 10)
 
