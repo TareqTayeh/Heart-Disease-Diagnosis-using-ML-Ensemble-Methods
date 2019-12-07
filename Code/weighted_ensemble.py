@@ -59,22 +59,11 @@ for train_index, test_index in kf.split(x):
     X_train, X_test = x[train_index], x[test_index]
     Y_train, Y_test = y[train_index], y[test_index]
 
-    #train test split, random 20% test and 80% train becasue its not a time series
-    #X_train, _ , Y_train, _ = train_test_split(x,y, test_size = 0.2)
-    #Y_train = Y_train.reshape(-1, 1)
-    
     #normailize train data 
     norm = MinMaxScaler(feature_range=(0, 1))
     X_train = norm.fit_transform(X_train)
     Y_train = norm.fit_transform(Y_train.reshape(-1, 1))
-    #normalize data for test split 
-    #test = norm.fit_transform(data)
-    #Y_test = np.delete(test,[0,1,2,3,4,5,6,7], 1)
-    #X_test = np.delete(test, 8, 1)
-    
-    #get test split
-    #_, X_test, _, Y_test = train_test_split(X_test, Y_test, test_size = 0.2)
-    
+   
     X_test = norm.fit_transform(X_test)
     Y_test = norm.fit_transform(Y_test.reshape(-1, 1))
     
@@ -135,7 +124,7 @@ for train_index, test_index in kf.split(x):
     
     
     #Combine in ensemble 
-    Y_pred = VotingClassification(estimators=[('svm', modelSVM), ('lr',modelLR), ('GNB', modelGNB), ('NN', )], voting='hard', weights=(weight_SVM,weight_LR,weight_GNB,weight_NN), n_jobs=None, flatten_transform=True)
+    Y_pred = VotingClassification(estimators=[('svm', modelSVM), ('lr',modelLR), ('GNB', modelGNB), ('NN', model.compile(loss='binary_crossentropy', optimizer=adam, metrics=['accuracy']))], voting='hard', weights=(weight_SVM,weight_LR,weight_GNB,weight_NN), n_jobs=None, flatten_transform=True)
     Y_pred = Y_pred.fit(X_train, Y_train)
     pred = Y_pred.predict(X_test)
     
