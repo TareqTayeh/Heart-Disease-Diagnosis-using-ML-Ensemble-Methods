@@ -1,8 +1,11 @@
-#ensemble with weights based on lowest false negatives
+#ensemble with no weights
 #import the required libraries
 import pandas as pd
 import numpy
 import numpy as np
+import tensorflow as tf
+import seaborn as sn
+import matplotlib.pyplot as plt
 
 from sklearn.svm import SVC #support vector classifier class
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
@@ -11,10 +14,11 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.linear_model import LogisticRegression as logr
 from sklearn.ensemble import VotingClassifier as VotingClassification
 from sklearn.naive_bayes import GaussianNB
-from keras.models import Sequential
-from keras.layers import Dropout, Dense
-from keras.optimizers import adam
-    
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.optimizers import Adam 
+
+
 #reading in data from excel
 data = pd.read_excel (r'C:\Users\lauren\Documents\1st year Grad\ECE 9603\project\heart_edited.xlsx')
 data = data.drop(['Age'], axis = 1)
@@ -27,7 +31,7 @@ data = data.drop(['trestbps'], axis = 1)
 #assign x and y
 y = data.target.values.ravel()
 x = data.drop(['target'], axis = 1)
-#make array from df
+#df to array
 x=np.array(x)
 y=np.array(y)
 
@@ -50,7 +54,7 @@ gs = ['GNB1', 'GNB2', 'GNB3', 'GNB4', 'GNB5']
 ns = ['NN1',  'NN2',  'NN3',  'NN4',  'NN5']
 es = ['ENS1', 'ENS2', 'ENS3', 'ENS4', 'ENS5']
 
-a=0   
+a=0
 #k folds split
 kf = KFold(5, True)
 kf.get_n_splits(x) 
@@ -58,22 +62,11 @@ kf.get_n_splits(x)
 for train_index, test_index in kf.split(x):
     X_train, X_test = x[train_index], x[test_index]
     Y_train, Y_test = y[train_index], y[test_index]
-
-    #train test split, random 20% test and 80% train becasue its not a time series
-    #X_train, _ , Y_train, _ = train_test_split(x,y, test_size = 0.2)
-    #Y_train = Y_train.reshape(-1, 1)
     
     #normailize train data 
     norm = MinMaxScaler(feature_range=(0, 1))
     X_train = norm.fit_transform(X_train)
     Y_train = norm.fit_transform(Y_train.reshape(-1, 1))
-    #normalize data for test split 
-    #test = norm.fit_transform(data)
-    #Y_test = np.delete(test,[0,1,2,3,4,5,6,7], 1)
-    #X_test = np.delete(test, 8, 1)
-    
-    #get test split
-    #_, X_test, _, Y_test = train_test_split(X_test, Y_test, test_size = 0.2)
     
     X_test = norm.fit_transform(X_test)
     Y_test = norm.fit_transform(Y_test.reshape(-1, 1))
@@ -82,7 +75,7 @@ for train_index, test_index in kf.split(x):
     l = ls[a]
     g = gs[a]
     n = ns[a]
-    e = es[a]   
+    e = es[a]
     
     #build models
     #SVM model
@@ -100,7 +93,7 @@ for train_index, test_index in kf.split(x):
     modelGNB.fit(X_train, Y_train.ravel())
     Y_pred_GNB = modelGNB.predict(X_test)
     
-    #NN Model 
+    #NN Model
     model = Sequential()
     model.add(Dense(16, input_dim=8, kernel_initializer='normal', activation='relu'))
     model.add(Dense(8, kernel_initializer='normal', activation='relu'))
@@ -108,38 +101,21 @@ for train_index, test_index in kf.split(x):
     model.add(Dense(1, activation='sigmoid'))
 
     # Compile model
-    Adam = adam(lr=0.001)
-    model.compile(loss='binary_crossentropy', optimizer=Adam, metrics=['accuracy'])
+    adam = Adam(lr=0.001)
+    model.compile(loss='binary_crossentropy', optimizer=adam, metrics=['accuracy'])
     model.fit(X_train, Y_train, validation_data=(X_test, Y_test), epochs=300, batch_size=10, verbose = 10)
     Y_pred_NN = np.round(model.predict(X_test)).astype(int)
-       
-    #determine weight based on lowest false negaitve
-    cm_SVM= confusion_matrix(Y_test,Y_pred_SVM)
-    cm_LR= confusion_matrix(Y_test,Y_pred_LR)
-    cm_GNB = confusion_matrix(Y_test,Y_pred_GNB)
-    cm_NN = confusion_matrix(Y_test,Y_pred_NN)
-    SVM_fn = cm_SVM[1][0]
-    LR_fn = cm_LR[1][0]
-    GNB_fn = cm_GNB[1][0]
-    NN_fn = cm_NN[1][0]
-    
-    falseNegs = pd.DataFrame((SVM_fn, LR_fn, GNB_fn, NN_fn), ('svm', 'lr', 'GNB', 'NN'))
-    w = falseNegs.sort_values(by=[0], )
-    weight = [5,2,1,1]
-    w["weight"]=weight
-    #order from smallest to largest
-    weight_SVM = w.at['svm','weight']
-    weight_LR = w.at['lr','weight']
-    weight_GNB = w.at['GNB','weight']
-    weight_NN = w.at['NN','weight']
-    
     
     #Combine in ensemble 
-    Y_pred = VotingClassification(estimators=[('svm', modelSVM), ('lr',modelLR), ('GNB', modelGNB), ('NN', )], voting='hard', weights=(weight_SVM,weight_LR,weight_GNB,weight_NN), n_jobs=None, flatten_transform=True)
+    Y_pred = VotingClassification(estimators=[('svm', modelSVM), ('lr',modelLR), ('GNB', modelGNB), ('NN', model.compile(loss='binary_crossentropy', optimizer=adam, metrics=['accuracy']))], voting='hard', weights=None, n_jobs=None, flatten_transform=True)
     Y_pred = Y_pred.fit(X_train, Y_train)
     pred = Y_pred.predict(X_test)
     
     #get results
+    cm_SVM= confusion_matrix(Y_test,Y_pred_SVM)
+    cm_LR= confusion_matrix(Y_test,Y_pred_LR)
+    cm_GNB = confusion_matrix(Y_test,Y_pred_GNB)
+    cm_NN = confusion_matrix(Y_test,Y_pred_NN)
     cm_en = confusion_matrix(Y_test, pred)
     
     #false negs, true neg, false pos, true pos
@@ -169,8 +145,6 @@ for train_index, test_index in kf.split(x):
     clResultsNN[n] = result_NN
     clResultsENS[e] = result_en
     a=a+1
-
-
 
 #get average results
 cmResultsSVM['AVG'] = cmResultsSVM.mean(axis=1)

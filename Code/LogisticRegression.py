@@ -6,7 +6,7 @@ import seaborn as sn
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LogisticRegression as logr
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, KFold
 from sklearn.preprocessing import MinMaxScaler
 
 #***** assign values after train test split from average of coresponding heart disease true or false ********8
@@ -22,36 +22,36 @@ data = data.drop(['trestbps'], axis = 1)
 #assign x and y
 y = data.target.values
 x = data.drop(['target'], axis = 1)
+#make array from df
+x=np.array(x)
+y=np.array(y)
 
-ls = ['LR1',  'LR2',  'LR3',  'LR4',  'LR5', 'LR6',  'LR7',  'LR8',  'LR9',  'LR10', 'LR11', 'LR12', 'LR13', 'LR14', 'LR15', 'LR16', 'LR17',  'LR18',  'LR19', 'LR20']
-cmResults = pd.DataFrame(columns  = ['LR1',  'LR2',  'LR3',  'LR4',  'LR5', 'LR6',  'LR7',  'LR8',  'LR9',  'LR10', 'LR11', 'LR12', 'LR13', 'LR14', 'LR15', 'LR16', 'LR17',  'LR18',  'LR19', 'LR20', 'AVG'])
-clResults = pd.DataFrame(columns  = ['LR1',  'LR2',  'LR3',  'LR4',  'LR5', 'LR6',  'LR7',  'LR8',  'LR9',  'LR10', 'LR11', 'LR12', 'LR13', 'LR14', 'LR15', 'LR16', 'LR17',  'LR18',  'LR19', 'LR20', 'AVG'])
+ls = ['LR1',  'LR2',  'LR3',  'LR4',  'LR5']
+cmResults = pd.DataFrame(columns  = ['LR1',  'LR2',  'LR3',  'LR4',  'LR5'])
+clResults = pd.DataFrame(columns  = ['LR1',  'LR2',  'LR3',  'LR4',  'LR5'])
 
 solvers = ['newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga']
 
+#k folds split
+kf = KFold(5, True)
+kf.get_n_splits(x)
 for a in range (0,5):
     sol = solvers[a]#set solver type
     print("solver type is: ", sol)
-    
-    for b in range(0,20): #run 20 times for each solver
-        l=ls[b]
-           
-        #train test split, random 20% test and 80% train becasue its not a time series
-        X_train, _ , Y_train, _ = train_test_split(x,y, test_size = 0.2)
-        Y_train = Y_train.reshape(-1, 1)
+    b=0
+    l=ls[b]
+    # Enumerate splits
+    for train_index, test_index in kf.split(x):
+        X_train, X_test = x[train_index], x[test_index]
+        Y_train, Y_test = y[train_index], y[test_index]
         
         #normailize train data 
         norm = MinMaxScaler(feature_range=(0, 1))
         X_train = norm.fit_transform(X_train)
-        Y_train = norm.fit_transform(Y_train)
+        Y_train = norm.fit_transform(Y_train.reshape(-1, 1))
         
-        #normalize data for test split 
-        test = norm.fit_transform(data)
-        Y_test = np.delete(test,[0,1,2,3,4,5,6,7], 1)
-        X_test = np.delete(test, 8, 1)
-        
-        #get test split
-        _, X_test, _, Y_test = train_test_split(X_test, Y_test, test_size = 0.2)
+        X_test = norm.fit_transform(X_test)
+        Y_test = norm.fit_transform(Y_test.reshape(-1, 1))
         
         #build model
         model = logr(solver = sol) #solver : {‘newton-cg’, ‘lbfgs’, ‘liblinear’, ‘sag’, ‘saga’}
@@ -66,6 +66,7 @@ for a in range (0,5):
         #record the average classification report info for each trial
         result_LR = (accuracy_score(Y_test,Y_pred), precision_score(Y_test,Y_pred), recall_score(Y_test,Y_pred), f1_score(Y_test,Y_pred))
         clResults[l] = result_LR
+        b=b+1
 
     #calculate average over 5 trials
     cmResults['AVG'] = cmResults.mean(axis=1)

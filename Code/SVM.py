@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 from sklearn.svm import SVC #support vector classifier class
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, KFold
 from sklearn.preprocessing import MinMaxScaler
 
 
@@ -21,39 +21,36 @@ data = data.drop(['trestbps'], axis = 1)
 #assign x and y
 y = data.target.values.ravel()
 x = data.drop(['target'], axis = 1)
+#make array from df
+x=np.array(x)
+y=np.array(y)
 
-SVM = ['SVM1',  'SVM2',  'SVM3',  'SVM4',  'SVM5', 'SVM6',  'SVM7',  'SVM8',  'SVM9',  'SVM10', 'SVM11', 'SVM12', 'SVM13', 'SVM14', 'SVM15', 'SVM16', 'SVM17',  'SVM18',  'SVM19', 'SVM20']
-cmResults = pd.DataFrame(columns  = ['SVM1',  'SVM2',  'SVM3',  'SVM4',  'SVM5', 'SVM6',  'SVM7',  'SVM8',  'SVM9',  'SVM10', 'SVM11', 'SVM12', 'SVM13', 'SVM14', 'SVM15', 'SVM16', 'SVM17',  'SVM18',  'SVM19', 'SVM20', 'AVG'])
-clResults = pd.DataFrame(columns  = ['SVM1',  'SVM2',  'SVM3',  'SVM4',  'SVM5', 'SVM6',  'SVM7',  'SVM8',  'SVM9',  'SVM10', 'SVM11', 'SVM12', 'SVM13', 'SVM14', 'SVM15', 'SVM16', 'SVM17',  'SVM18',  'SVM19', 'SVM20', 'AVG'])
+SVM = ['SVM1',  'SVM2',  'SVM3',  'SVM4',  'SVM5']
+cmResults = pd.DataFrame(columns  = ['SVM1',  'SVM2',  'SVM3',  'SVM4',  'SVM5'])
+clResults = pd.DataFrame(columns  = ['SVM1',  'SVM2',  'SVM3',  'SVM4',  'SVM5'])
 
 kernels = ['linear', 'poly', 'rbf', 'sigmoid']
 
-
+#k folds split
+kf = KFold(5, True)
+kf.get_n_splits(x)
 for a in range (0,4):
     ker = kernels[a]#set solver type
     print("kernel type is: ", ker)
-    
-    for b in range(0,20): #run 20 times for each solver
+    b=0
+    # Enumerate splits
+    for train_index, test_index in kf.split(x):
         s=SVM[b]
         
-        #train test split, random 20% test and 80% train becasue its not a time series
-        X_train, _ , Y_train, _ = train_test_split(x,y, test_size = 0.2)
-        Y_train = Y_train.reshape(-1, 1)
-        
+        X_train, X_test = x[train_index], x[test_index]
+        Y_train, Y_test = y[train_index], y[test_index]      
         #normailize train data 
         norm = MinMaxScaler(feature_range=(0, 1))
         X_train = norm.fit_transform(X_train)
-        Y_train = norm.fit_transform(Y_train)
-        
-        #normalize data for test split 
-        test = norm.fit_transform(data)
-        Y_test = np.delete(test,[0,1,2,3,4,5,6,7], 1)
-        X_test = np.delete(test, 8, 1)
-        
-        #get test split
-        _, X_test, _, Y_test = train_test_split(X_test, Y_test, test_size = 0.2)
-        
-        
+        Y_train = norm.fit_transform(Y_train.reshape(-1, 1))
+        X_test = norm.fit_transform(X_test)
+        Y_test = norm.fit_transform(Y_test.reshape(-1, 1))
+              
         model = SVC(kernel= ker,  gamma='scale') #kernal: ‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’
         model.fit(X_train, Y_train.ravel())
         Y_pred = model.predict(X_test)
@@ -66,8 +63,9 @@ for a in range (0,4):
         #record the average classification report info for each trial
         result_SVM = (accuracy_score(Y_test,Y_pred), precision_score(Y_test,Y_pred), recall_score(Y_test,Y_pred), f1_score(Y_test,Y_pred))
         clResults[s] = result_SVM
+        b=b+1
 
-
+    
     #calculate average over 5 trials
     cmResults['AVG'] = cmResults.mean(axis=1)
     clResults['AVG'] = clResults.mean(axis=1)
