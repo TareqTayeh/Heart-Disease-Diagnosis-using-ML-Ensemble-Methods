@@ -1,3 +1,5 @@
+#Lauren Flanagan
+
 #ensemble with no weights
 #import the required libraries
 import pandas as pd

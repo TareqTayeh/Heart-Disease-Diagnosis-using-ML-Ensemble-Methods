@@ -1,3 +1,5 @@
+#Lauren Flanagan
+
 #import the required libraries
 import pandas as pd
 import numpy

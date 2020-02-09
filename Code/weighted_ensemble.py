@@ -1,3 +1,5 @@
+#Lauren Flanagan
+
 #ensemble with weights based on lowest false negatives
 #import the required libraries
 import pandas as pd
