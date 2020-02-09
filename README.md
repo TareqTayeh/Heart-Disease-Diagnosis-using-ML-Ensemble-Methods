@@ -26,14 +26,14 @@ The following table highlights the data attributes, descriptions and types:
 First of all, the data was pre-processed via data editing, cleansing, generation and normalization techniques. Feature selection techniques of intrinsic discrepancy, correlation coefficients, and permutation importance were then applied onto the data set to eliminate the weakly correlated and unimportant features. 4 machine learning models were then applied on the selected features and their values; Logistic Regression, Support Vector Machine, Neural Network, and Naive Bayes. The models were tuned and implemented using the  Scikit, Keras, and Tenserflow packages in Python. Afterwards, an ensemble learning method was implemented, which combined the results of the 4 models before using a voting scheme to produce the final output. That yielded better accuracy and computation time than any of the other models run solo. 5 runs of the 5-fold cross validation validation method was in place for each method, providing a more random train/test split procedure and less skewed results. Each model's results were averaged across all runs then compared with each other using evaluation metrics, which included accuracy, recall, precision, f1-score, and a confusion matrix.
 
 You can find our written IEEE format journal paper for this project "Heart Disease Diagnosis Using Machine Learning.pdf" under the main directory. The paper is organized as follows: 
-• Section I: Introduction
-• Section II: Background & Evaluation Metrics 
-• Section III: Related Work
-• Section IV: Data Set
-• Section V: Data Pre-Processing
-• Section VI: Feature Selection Techniques 
-• Section VII: Validation Process
-• Section VIII: Implementations
-• Section IX: Results
-• Section X: Comparison of Results
+• Section I: Introduction <br />
+• Section II: Background & Evaluation Metrics <br />
+• Section III: Related Work <br />
+• Section IV: Data Set <br />
+• Section V: Data Pre-Processing <br />
+• Section VI: Feature Selection Techniques <br />
+• Section VII: Validation Process <br />
+• Section VIII: Implementations <br />
+• Section IX: Results <br />
+• Section X: Comparison of Results <br />
 • Section XI: Conclusions
