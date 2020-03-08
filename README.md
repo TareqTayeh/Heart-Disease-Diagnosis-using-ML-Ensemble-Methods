@@ -25,7 +25,7 @@ The following table highlights the data attributes, descriptions and types:
 
 First of all, the data was pre-processed via data editing, cleansing, generation and normalization techniques. Feature selection techniques of intrinsic discrepancy, correlation coefficients, and permutation importance were then applied onto the data set to eliminate the weakly correlated and unimportant features. 4 machine learning models were then applied on the selected features and their values; Logistic Regression, Support Vector Machine, Neural Network, and Naive Bayes. The models were tuned and implemented using the  Scikit, Keras, and Tenserflow packages in Python. Afterwards, an ensemble learning method was implemented, which combined the results of the 4 models before using a voting scheme to produce the final output. That yielded better accuracy and computation time than any of the other models run solo. 5 runs of the 5-fold cross validation validation method was in place for each method, providing a more random train/test split procedure and less skewed results. Each model's results were averaged across all runs then compared with each other using evaluation metrics, which included accuracy, recall, precision, f1-score, and a confusion matrix.
 
-You can find our written IEEE format journal paper for this project "Heart Disease Diagnosis Using Machine Learning.pdf" under the main directory. The paper is organized as follows: <br />
+You can find our written IEEE format journal paper for this project `Heart Disease Diagnosis Using Machine Learning.pdf` under the main directory. The paper is organized as follows: <br />
 • Section I: Introduction <br />
 • Section II: Background & Evaluation Metrics <br />
 • Section III: Related Work <br />
